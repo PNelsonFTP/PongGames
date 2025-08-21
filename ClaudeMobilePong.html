@@ -10,37 +10,66 @@
         padding: 0;
         height: 100%;
         overflow: hidden;
-        background: #000;
+        background: #006400;
         touch-action: none;
     }
     #gameCanvas {
         display: block;
-        background: #000;
+        background: #006400;
     }
     #score {
         position: absolute;
         top: 10px;
-        left: 0;
-        right: 0;
-        text-align: center;
+        left: 50%;
+        transform: translateX(-50%);
         color: #fff;
         font-family: sans-serif;
         font-size: 24px;
         user-select: none;
     }
+    #title {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 24px;
+        user-select: none;
+    }
+    #addBall {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+        padding: 10px 20px;
+        touch-action: auto;
+    }
 </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
+<div id="title">PacoPong</div>
 <div id="score">0 : 0</div>
+<button id="addBall">Add Ball</button>
 <script>
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 let scoreElem = document.getElementById('score');
 
 let width, height, paddleWidth, paddleHeight;
-let paddle1, paddle2, ball;
+let paddle1, paddle2, balls;
 let score1 = 0, score2 = 0;
+
+function createBall() {
+    return {
+        x: width / 2,
+        y: height / 2,
+        vx: width * 0.003 * (Math.random() > 0.5 ? 1 : -1),
+        vy: height * 0.003 * (Math.random() * 2 - 1),
+        r: width * 0.015
+    };
+}
 
 function resize() {
     width = window.innerWidth;
@@ -52,17 +81,17 @@ function resize() {
     paddleHeight = height * 0.2;
     paddle1 = { x: 10, y: (height - paddleHeight) / 2 };
     paddle2 = { x: width - paddleWidth - 10, y: (height - paddleHeight) / 2 };
-    ball = { x: width / 2, y: height / 2, vx: width * 0.003 * (Math.random() > 0.5 ? 1 : -1), vy: height * 0.003 * (Math.random() * 2 - 1), r: width * 0.015 };
+    balls = [createBall()];
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', resize);
 resize();
 
-function resetBall() {
-    ball.x = width / 2;
-    ball.y = height / 2;
-    ball.vx = width * 0.003 * (Math.random() > 0.5 ? 1 : -1);
-    ball.vy = height * 0.003 * (Math.random() * 2 - 1);
+function resetBall(b) {
+    b.x = width / 2;
+    b.y = height / 2;
+    b.vx = width * 0.003 * (Math.random() > 0.5 ? 1 : -1);
+    b.vy = height * 0.003 * (Math.random() * 2 - 1);
 }
 
 function clamp(value, min, max) {
@@ -82,30 +111,37 @@ function handleTouch(evt) {
 canvas.addEventListener('touchstart', handleTouch);
 canvas.addEventListener('touchmove', handleTouch);
 
+function addBall() {
+    balls.push(createBall());
+}
+document.getElementById('addBall').addEventListener('click', addBall);
+
 function update() {
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+    for (let b of balls) {
+        b.x += b.vx;
+        b.y += b.vy;
 
-    if (ball.y - ball.r < 0 || ball.y + ball.r > height) {
-        ball.vy *= -1;
-    }
+        if (b.y - b.r < 0 || b.y + b.r > height) {
+            b.vy *= -1;
+        }
 
-    if (ball.x - ball.r < paddle1.x + paddleWidth && ball.y > paddle1.y && ball.y < paddle1.y + paddleHeight) {
-        ball.vx = Math.abs(ball.vx);
-    }
-    if (ball.x + ball.r > paddle2.x && ball.y > paddle2.y && ball.y < paddle2.y + paddleHeight) {
-        ball.vx = -Math.abs(ball.vx);
-    }
+        if (b.x - b.r < paddle1.x + paddleWidth && b.y > paddle1.y && b.y < paddle1.y + paddleHeight) {
+            b.vx = Math.abs(b.vx);
+        }
+        if (b.x + b.r > paddle2.x && b.y > paddle2.y && b.y < paddle2.y + paddleHeight) {
+            b.vx = -Math.abs(b.vx);
+        }
 
-    if (ball.x < 0) {
-        score2++;
-        scoreElem.textContent = `${score1} : ${score2}`;
-        resetBall();
-    }
-    if (ball.x > width) {
-        score1++;
-        scoreElem.textContent = `${score1} : ${score2}`;
-        resetBall();
+        if (b.x < 0) {
+            score2++;
+            scoreElem.textContent = `${score1} : ${score2}`;
+            resetBall(b);
+        }
+        if (b.x > width) {
+            score1++;
+            scoreElem.textContent = `${score1} : ${score2}`;
+            resetBall(b);
+        }
     }
 }
 
@@ -125,7 +161,10 @@ function draw() {
     ctx.fillRect(paddle2.x, paddle2.y, paddleWidth, paddleHeight);
 
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    for (let b of balls) {
+        ctx.moveTo(b.x + b.r, b.y);
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    }
     ctx.fill();
 }
 
