@@ -307,6 +307,7 @@
         <div id="orientationWarning" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(234,246,255,0.97);z-index:9999;display:flex;justify-content:center;align-items:center;">
             <span style="font-size:32px;color:#0a1a6b;text-align:center;font-weight:bold;">Please rotate your device to landscape mode for the best experience.</span>
         </div>
+        <script>
         // Orientation check and warning
         function checkOrientation() {
             const warning = document.getElementById('orientationWarning');
@@ -347,6 +348,7 @@
                 elem.msRequestFullscreen();
             }
         });
+        </script>
 
         <div class="winner-overlay" id="winnerOverlay">
             <div class="winner-text" id="winnerText"></div>
