@@ -3,17 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="screen-orientation" content="landscape">
-    <script>
-    // Force landscape on mobile
-    function forceLandscape() {
-        if (window.screen.orientation && window.screen.orientation.lock) {
-            window.screen.orientation.lock('landscape').catch(() => {});
-        }
-    }
-    window.addEventListener('load', forceLandscape);
-    window.addEventListener('orientationchange', forceLandscape);
-    </script>
+    <!-- Remove broken orientation meta and script, use CSS and prompt for landscape -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Mobile Pong</title>
@@ -300,22 +290,62 @@
             <div class="pause-indicator" id="pauseIndicator">PAUSED</div>
         </div>
 
-        <div class="controls-container">
+        <div class="controls-container" id="controlsContainer">
             <div class="control-zone">
                 <button class="control-button" id="p1Up">↑</button>
                 <button class="control-button" id="p1Down">↓</button>
             </div>
-
-            <div style="display:flex;flex-direction:row;align-items:center;gap:12px;">
+            <div class="center-controls" style="display:flex;flex-direction:row;align-items:center;gap:12px;">
                 <button class="launch-button" id="launchBtn">BALL</button>
                 <button id="fullscreenBtn" style="font-size:20px;padding:8px 18px;border-radius:8px;border:none;background:#0a1a6b;color:#fff;cursor:pointer;">Fullscreen</button>
             </div>
-
             <div class="control-zone">
                 <button class="control-button" id="p2Up">↑</button>
                 <button class="control-button" id="p2Down">↓</button>
             </div>
         </div>
+        <div id="orientationWarning" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(234,246,255,0.95);z-index:9999;justify-content:center;align-items:center;font-size:32px;color:#0a1a6b;text-align:center;">
+            Please rotate your device to landscape mode for the best experience.
+        </div>
+        // Orientation check and warning
+        function checkOrientation() {
+            const warning = document.getElementById('orientationWarning');
+            if (window.innerWidth < window.innerHeight) {
+                warning.style.display = 'flex';
+                document.getElementById('controlsContainer').style.display = 'none';
+            } else {
+                warning.style.display = 'none';
+                document.getElementById('controlsContainer').style.display = 'flex';
+            }
+        }
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        window.addEventListener('load', checkOrientation);
+
+        // Robust error handling for button events
+        function safeAddEvent(id, event, handler) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, handler);
+            } else {
+                console.error('Element not found:', id);
+            }
+        }
+        safeAddEvent('p1Up', 'touchstart', (e) => { e.preventDefault(); p1UpTouch = true; paddle1.moving = 'up'; vibrate(30); playButtonSound(); });
+        safeAddEvent('p1Down', 'touchstart', (e) => { e.preventDefault(); p1DownTouch = true; paddle1.moving = 'down'; vibrate(30); playButtonSound(); });
+        safeAddEvent('p2Up', 'touchstart', (e) => { e.preventDefault(); p2UpTouch = true; paddle2.moving = 'up'; vibrate(30); playButtonSound(); });
+        safeAddEvent('p2Down', 'touchstart', (e) => { e.preventDefault(); p2DownTouch = true; paddle2.moving = 'down'; vibrate(30); playButtonSound(); });
+        safeAddEvent('launchBtn', 'click', (e) => { e.preventDefault(); playButtonSound(); vibrate([20, 20, 20]); if (!gameStarted) { startGame(); } else if (!paused && !gameOver) { createBall(); } });
+        safeAddEvent('fullscreenBtn', 'click', function() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        });
 
         <div class="winner-overlay" id="winnerOverlay">
             <div class="winner-text" id="winnerText"></div>
