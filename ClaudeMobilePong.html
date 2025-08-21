@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="landscape">
+    <script>
+    // Force landscape on mobile
+    function forceLandscape() {
+        if (window.screen.orientation && window.screen.orientation.lock) {
+            window.screen.orientation.lock('landscape').catch(() => {});
+        }
+    }
+    window.addEventListener('load', forceLandscape);
+    window.addEventListener('orientationchange', forceLandscape);
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Mobile Pong</title>
@@ -295,7 +306,7 @@
                 <button class="control-button" id="p1Down">↓</button>
             </div>
 
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div style="display:flex;flex-direction:row;align-items:center;gap:12px;">
                 <button class="launch-button" id="launchBtn">BALL</button>
                 <button id="fullscreenBtn" style="font-size:20px;padding:8px 18px;border-radius:8px;border:none;background:#0a1a6b;color:#fff;cursor:pointer;">Fullscreen</button>
             </div>
