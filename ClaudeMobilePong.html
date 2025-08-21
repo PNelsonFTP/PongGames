@@ -6,6 +6,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Mobile Pong</title>
+    <script>
+    // Haptic feedback utility
+    function vibrate(pattern) {
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -70,7 +78,7 @@
         }
 
         .score {
-            color: #fff;
+            color: #0a1a6b;
             font-size: 32px;
             font-weight: bold;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
@@ -346,7 +354,7 @@
         // Sound system
         let audioContext = null;
         let soundEnabled = false;
-        
+
         function initAudio() {
             try {
                 if (!audioContext) {
@@ -357,26 +365,28 @@
                 console.log('Audio not available');
             }
         }
-        
-        function playSound(frequency, duration) {
+
+        function playSound(frequency, duration, type = 'sine', volume = 0.2) {
             if (!audioContext || !soundEnabled) return;
-            
             try {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
+                oscillator.type = type;
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
                 oscillator.frequency.value = frequency;
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-                
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + duration);
             } catch (e) {
                 // Silent fail
             }
+        }
+
+        // Button sound
+        function playButtonSound() {
+            playSound(400, 0.08, 'square', 0.15);
         }
         
         // Responsive canvas sizing
@@ -438,6 +448,8 @@
             e.preventDefault();
             p1UpTouch = true;
             paddle1.moving = 'up';
+            vibrate(30);
+            playButtonSound();
         });
         
         document.getElementById('p1Up').addEventListener('touchend', (e) => {
@@ -450,6 +462,8 @@
             e.preventDefault();
             p1DownTouch = true;
             paddle1.moving = 'down';
+            vibrate(30);
+            playButtonSound();
         });
         
         document.getElementById('p1Down').addEventListener('touchend', (e) => {
@@ -466,6 +480,8 @@
             e.preventDefault();
             p2UpTouch = true;
             paddle2.moving = 'up';
+            vibrate(30);
+            playButtonSound();
         });
         
         document.getElementById('p2Up').addEventListener('touchend', (e) => {
@@ -478,6 +494,8 @@
             e.preventDefault();
             p2DownTouch = true;
             paddle2.moving = 'down';
+            vibrate(30);
+            playButtonSound();
         });
         
         document.getElementById('p2Down').addEventListener('touchend', (e) => {
@@ -489,6 +507,8 @@
         // Launch button
         document.getElementById('launchBtn').addEventListener('click', (e) => {
             e.preventDefault();
+            playButtonSound();
+            vibrate([20, 20, 20]);
             if (!gameStarted) {
                 startGame();
             } else if (!paused && !gameOver) {
@@ -499,6 +519,8 @@
         // Pause button
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             e.preventDefault();
+            playButtonSound();
+            vibrate(40);
             if (gameStarted && !gameOver) {
                 togglePause();
             }
@@ -507,6 +529,8 @@
         // Restart button
         document.getElementById('restartBtn').addEventListener('click', (e) => {
             e.preventDefault();
+            playButtonSound();
+            vibrate([50, 50, 50]);
             resetGame();
         });
         
@@ -536,6 +560,7 @@
             
             balls.push(newBall);
             playSound(600, 0.1);
+            vibrate(20);
             updateBallCounter();
         }
         
@@ -694,6 +719,8 @@
         function updateScoreDisplay() {
             document.getElementById('score1').textContent = paddle1.score;
             document.getElementById('score2').textContent = paddle2.score;
+            playSound(800, 0.15, 'triangle', 0.18);
+            vibrate([60, 30, 60]);
         }
         
         function draw() {
@@ -784,6 +811,7 @@
             document.getElementById('finalScore').textContent = `${paddle1.score} - ${paddle2.score}`;
             document.getElementById('winnerOverlay').style.display = 'flex';
             playSound(800, 0.5);
+            vibrate([100, 100, 100, 100]);
         }
         
         function resetGame() {
