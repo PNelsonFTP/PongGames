@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Mobile Pong</title>
     <style>
         * {
@@ -15,6 +18,14 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
         }
 
         body {
@@ -22,16 +33,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             font-family: 'Arial', sans-serif;
-            overflow: hidden;
             touch-action: none;
         }
 
         .game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -42,16 +53,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         canvas {
             display: block;
             background: #0a0a0a;
             border: 2px solid #fff;
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
+            position: absolute;
         }
 
         .score-display {
@@ -73,10 +82,10 @@
         }
 
         .controls-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            position: fixed;
+            bottom: env(safe-area-inset-bottom, 0);
+            left: env(safe-area-inset-left, 0);
+            right: env(safe-area-inset-right, 0);
             display: flex;
             justify-content: space-between;
             padding: 10px;
@@ -90,8 +99,8 @@
         }
 
         .control-button {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid #fff;
             border-radius: 15px;
@@ -111,15 +120,15 @@
         }
 
         .launch-button {
-            position: absolute;
-            bottom: 20px;
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 60px;
+            width: 100px;
+            height: 50px;
             background: rgba(255, 100, 100, 0.3);
             border: 2px solid #ff6464;
-            border-radius: 30px;
+            border-radius: 25px;
             color: #fff;
             font-size: 16px;
             font-weight: bold;
@@ -128,6 +137,32 @@
 
         .launch-button:active {
             background: rgba(255, 100, 100, 0.5);
+        }
+
+        .top-controls {
+            position: fixed;
+            top: env(safe-area-inset-top, 10px);
+            right: env(safe-area-inset-right, 10px);
+            display: flex;
+            gap: 10px;
+            z-index: 102;
+        }
+
+        .top-button {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-button:active {
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .instructions {
@@ -145,20 +180,7 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             z-index: 50;
-        }
-
-        .pause-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid #fff;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 20px;
-            z-index: 102;
+            max-width: 90%;
         }
 
         .pause-indicator {
@@ -175,7 +197,7 @@
         }
 
         .winner-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -222,38 +244,54 @@
             z-index: 10;
         }
 
+        .sound-indicator {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10;
+            text-align: center;
+        }
+
         @media (orientation: landscape) {
             .control-zone {
                 flex-direction: row;
             }
             
             .control-button {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
             }
             
             .launch-button {
-                width: 100px;
-                height: 50px;
+                width: 80px;
+                height: 40px;
                 font-size: 14px;
             }
         }
 
-        @media (max-height: 600px) {
+        @media (max-height: 500px) {
             .control-button {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
             }
             
             .score {
-                font-size: 24px;
+                font-size: 20px;
             }
+        }
+
+        .fullscreen-supported .fullscreen-button {
+            display: flex;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-container" id="gameContainer">
         <div class="game-area">
             <canvas id="gameCanvas"></canvas>
             
@@ -264,16 +302,22 @@
 
             <div class="ball-counter" id="ballCounter"></div>
 
-            <button class="pause-button" id="pauseBtn">⏸</button>
+            <div class="top-controls">
+                <button class="top-button" id="soundBtn">🔊</button>
+                <button class="top-button" id="fullscreenBtn">⛶</button>
+                <button class="top-button" id="pauseBtn">⏸</button>
+            </div>
 
             <div class="instructions" id="instructions">
                 <strong>TAP TO START</strong><br>
                 Use arrow buttons to move paddles<br>
                 Tap BALL button to launch balls<br>
-                First to 7 wins!
+                First to 7 wins!<br>
+                <small>Tap 🔊 to enable sound</small>
             </div>
 
             <div class="pause-indicator" id="pauseIndicator">PAUSED</div>
+            <div class="sound-indicator" id="soundIndicator"></div>
         </div>
 
         <div class="controls-container">
@@ -301,31 +345,105 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Sound system with user activation for mobile
+        let audioContext = null;
+        let soundEnabled = false;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                soundEnabled = true;
+                document.getElementById('soundBtn').textContent = '🔊';
+                document.getElementById('soundIndicator').textContent = 'Sound ON';
+                setTimeout(() => {
+                    document.getElementById('soundIndicator').textContent = '';
+                }, 2000);
+            }
+        }
+        
+        function toggleSound() {
+            if (!audioContext) {
+                initAudio();
+            } else {
+                soundEnabled = !soundEnabled;
+                document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+                document.getElementById('soundIndicator').textContent = soundEnabled ? 'Sound ON' : 'Sound OFF';
+                setTimeout(() => {
+                    document.getElementById('soundIndicator').textContent = '';
+                }, 2000);
+            }
+        }
+        
+        document.getElementById('soundBtn').addEventListener('click', toggleSound);
+        
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const elem = document.documentElement;
+            
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+                document.getElementById('fullscreenBtn').textContent = '◱';
+                
+                // Also hide address bar on mobile by scrolling
+                setTimeout(() => {
+                    window.scrollTo(0, 1);
+                }, 100);
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                document.getElementById('fullscreenBtn').textContent = '⛶';
+            }
+        }
+        
+        document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+        
+        // Hide fullscreen button if not supported
+        if (!document.fullscreenEnabled && !document.webkitFullscreenEnabled) {
+            document.getElementById('fullscreenBtn').style.display = 'none';
+        }
+        
         // Responsive canvas sizing
         function resizeCanvas() {
             const container = document.querySelector('.game-area');
-            const maxWidth = container.clientWidth - 20;
-            const maxHeight = container.clientHeight - 150; // Leave room for controls
+            const rect = container.getBoundingClientRect();
+            const maxWidth = rect.width - 20;
+            const maxHeight = rect.height - 120; // Leave room for controls
             
             const aspectRatio = 2; // Width:Height ratio
             
             if (maxWidth / maxHeight > aspectRatio) {
-                canvas.height = maxHeight;
-                canvas.width = maxHeight * aspectRatio;
+                canvas.height = Math.min(maxHeight, 600); // Cap height for better playability
+                canvas.width = canvas.height * aspectRatio;
             } else {
-                canvas.width = maxWidth;
-                canvas.height = maxWidth / aspectRatio;
+                canvas.width = Math.min(maxWidth, 1200); // Cap width
+                canvas.height = canvas.width / aspectRatio;
             }
+            
+            // Center the canvas
+            canvas.style.left = '50%';
+            canvas.style.top = '50%';
+            canvas.style.transform = 'translate(-50%, -50%)';
+            
+            // Reinitialize game objects with new sizes
+            initializeSizes();
         }
         
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
         // Game settings
-        const PADDLE_HEIGHT_RATIO = 0.2; // Paddle height as ratio of canvas height
-        const PADDLE_WIDTH_RATIO = 0.02; // Paddle width as ratio of canvas width
-        const BALL_SIZE_RATIO = 0.025; // Ball size as ratio of canvas height
-        const PADDLE_SPEED_RATIO = 0.02; // Paddle speed as ratio of canvas height
+        const PADDLE_HEIGHT_RATIO = 0.2;
+        const PADDLE_WIDTH_RATIO = 0.02;
+        const BALL_SIZE_RATIO = 0.025;
+        const PADDLE_SPEED_RATIO = 0.02;
         const INITIAL_BALL_SPEED_RATIO = 0.012;
         const MAX_BALL_SPEED_RATIO = 0.025;
         const WINNING_SCORE = 7;
@@ -367,22 +485,27 @@
             paddle2.height = canvas.height * PADDLE_HEIGHT_RATIO;
             paddle2.x = canvas.width * 0.95 - paddle2.width;
             paddle2.y = canvas.height / 2 - paddle2.height / 2;
+            
+            // Update ball sizes for existing balls
+            balls.forEach(ball => {
+                ball.size = canvas.height * BALL_SIZE_RATIO;
+            });
         }
         
-        initializeSizes();
+        // Call resize on load and orientation change
+        resizeCanvas();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
         
         // Multiple balls array
         const balls = [];
         const particles = [];
         
         // Touch controls
-        let touchIntervals = {
-            p1Up: null,
-            p1Down: null,
-            p2Up: null,
-            p2Down: null
-        };
-        
         // Player 1 controls
         document.getElementById('p1Up').addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -404,6 +527,12 @@
             if (paddle1.moving === 'down') paddle1.moving = null;
         });
         
+        // Mouse support for desktop testing
+        document.getElementById('p1Up').addEventListener('mousedown', () => paddle1.moving = 'up');
+        document.getElementById('p1Down').addEventListener('mousedown', () => paddle1.moving = 'down');
+        document.getElementById('p1Up').addEventListener('mouseup', () => { if (paddle1.moving === 'up') paddle1.moving = null; });
+        document.getElementById('p1Down').addEventListener('mouseup', () => { if (paddle1.moving === 'down') paddle1.moving = null; });
+        
         // Player 2 controls
         document.getElementById('p2Up').addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -424,6 +553,12 @@
             e.preventDefault();
             if (paddle2.moving === 'down') paddle2.moving = null;
         });
+        
+        // Mouse support for desktop testing
+        document.getElementById('p2Up').addEventListener('mousedown', () => paddle2.moving = 'up');
+        document.getElementById('p2Down').addEventListener('mousedown', () => paddle2.moving = 'down');
+        document.getElementById('p2Up').addEventListener('mouseup', () => { if (paddle2.moving === 'up') paddle2.moving = null; });
+        document.getElementById('p2Down').addEventListener('mouseup', () => { if (paddle2.moving === 'down') paddle2.moving = null; });
         
         // Launch button
         document.getElementById('launchBtn').addEventListener('click', (e) => {
@@ -453,19 +588,24 @@
         canvas.addEventListener('click', () => {
             if (!gameStarted) {
                 startGame();
+                if (!audioContext) {
+                    initAudio(); // Try to init audio on first interaction
+                }
             }
         });
         
-        // Sound system (simplified for mobile)
-        function playSound(frequency, duration) {
+        // Sound functions
+        function playSound(frequency, duration, type = 'square') {
+            if (!audioContext || !soundEnabled) return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
                 
+                oscillator.type = type;
                 oscillator.frequency.value = frequency;
                 gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
@@ -473,8 +613,22 @@
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + duration);
             } catch (e) {
-                // Silently fail if audio doesn't work
+                console.log('Sound error:', e);
             }
+        }
+        
+        function playHitSound() {
+            playSound(400, 0.1);
+        }
+        
+        function playScoreSound() {
+            playSound(200, 0.3, 'sine');
+        }
+        
+        function playWinSound() {
+            playSound(800, 0.5, 'sine');
+            setTimeout(() => playSound(1000, 0.5, 'sine'), 100);
+            setTimeout(() => playSound(1200, 0.5, 'sine'), 200);
         }
         
         // Ball creation
@@ -605,7 +759,7 @@
                         ball.dx = Math.sign(ball.dx) * ball.speed;
                     }
                     
-                    playSound(400, 0.1);
+                    playHitSound();
                     createParticles(paddle1.x + paddle1.width, ball.y, '#00ff00');
                 }
                 
@@ -625,7 +779,7 @@
                         ball.dx = Math.sign(ball.dx) * ball.speed;
                     }
                     
-                    playSound(400, 0.1);
+                    playHitSound();
                     createParticles(paddle2.x, ball.y, '#00ff00');
                 }
                 
@@ -640,7 +794,7 @@
                 }
                 
                 if (scored) {
-                    playSound(200, 0.3);
+                    playScoreSound();
                     createParticles(ball.x, ball.y, '#ff0000');
                     balls.splice(i, 1);
                     updateScoreDisplay();
@@ -736,6 +890,9 @@
             gameOver = false;
             createBall();
             gameLoop();
+            
+            // Try to hide mobile browser UI
+            window.scrollTo(0, 1);
         }
         
         function endGame() {
@@ -744,7 +901,7 @@
             document.getElementById('winnerText').textContent = `${winner} WINS!`;
             document.getElementById('finalScore').textContent = `${paddle1.score} - ${paddle2.score}`;
             document.getElementById('winnerOverlay').style.display = 'flex';
-            playSound(800, 0.5);
+            playWinSound();
         }
         
         function resetGame() {
@@ -763,6 +920,13 @@
         
         // Initial draw
         draw();
+        
+        // Try to hide address bar on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+            }, 0);
+        });
     </script>
 </body>
 </html>
