@@ -304,20 +304,13 @@
                 <button class="control-button" id="p2Down">↓</button>
             </div>
         </div>
-        <div id="orientationWarning" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(234,246,255,0.97);z-index:9999;display:flex;justify-content:center;align-items:center;">
-            <span style="font-size:32px;color:#0a1a6b;text-align:center;font-weight:bold;">Please rotate your device to landscape mode for the best experience.</span>
-        </div>
         // Orientation check and warning
         function checkOrientation() {
             const warning = document.getElementById('orientationWarning');
             const gameContainer = document.querySelector('.game-container');
-            if (window.innerWidth < window.innerHeight) {
-                warning.style.display = 'flex';
-                gameContainer.style.display = 'none';
-            } else {
-                warning.style.display = 'none';
-                gameContainer.style.display = 'block';
-            }
+            const isPortrait = window.innerWidth < window.innerHeight;
+            warning.style.display = isPortrait ? 'flex' : 'none';
+            gameContainer.style.display = isPortrait ? 'none' : 'block';
         }
         window.addEventListener('resize', checkOrientation);
         window.addEventListener('orientationchange', checkOrientation);
@@ -353,6 +346,10 @@
             <div class="final-score" id="finalScore"></div>
             <button class="restart-button" id="restartBtn">PLAY AGAIN</button>
         </div>
+    </div>
+
+    <div id="orientationWarning" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(234,246,255,0.97);z-index:9999;display:flex;justify-content:center;align-items:center;">
+        <span style="font-size:32px;color:#0a1a6b;text-align:center;font-weight:bold;">Please rotate your device to landscape mode for the best experience.</span>
     </div>
 
     <script>
