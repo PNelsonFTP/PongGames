@@ -266,18 +266,14 @@
 <body>
     <div class="game-container">
         <div id="top-bar" style="width:100%;display:flex;align-items:center;justify-content:center;margin-top:16px;gap:32px;">
-            <span id="pacopong-title" style="font-size:32px;font-weight:bold;color:#0a1a6b;letter-spacing:2px;">PacoPong</span>
             <div class="score" id="score1" style="margin:0 16px;">0</div>
+            <span id="pacopong-title" style="font-size:32px;font-weight:bold;color:#0a1a6b;letter-spacing:2px;">PacoPong</span>
             <div class="score" id="score2" style="margin:0 16px;">0</div>
-            <button id="fullscreenBtn" style="font-size:20px;padding:8px 18px;border-radius:8px;border:none;background:#0a1a6b;color:#fff;cursor:pointer;">Fullscreen</button>
         </div>
         <div class="game-area">
             <canvas id="gameCanvas"></canvas>
             
-            <div class="score-display">
-                <div class="score" id="score1">0</div>
-                <div class="score" id="score2">0</div>
-            </div>
+            <!-- Removed duplicate score display -->
 
             <div class="ball-counter" id="ballCounter"></div>
 
@@ -299,7 +295,10 @@
                 <button class="control-button" id="p1Down">↓</button>
             </div>
 
-            <button class="launch-button" id="launchBtn">BALL</button>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                <button class="launch-button" id="launchBtn">BALL</button>
+                <button id="fullscreenBtn" style="font-size:20px;padding:8px 18px;border-radius:8px;border:none;background:#0a1a6b;color:#fff;cursor:pointer;">Fullscreen</button>
+            </div>
 
             <div class="control-zone">
                 <button class="control-button" id="p2Up">↑</button>
